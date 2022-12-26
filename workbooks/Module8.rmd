@@ -1,0 +1,160 @@
+---
+title: COP2073C Intro to Statistical Programming with R
+output:
+  html_document:
+    code_folding: show
+editor_options:
+  chunk_output_type: console
+  markdown: 
+    wrap: 80
+---
+
+```{r rmarkdown-setup, echo = FALSE}
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+```
+
+## Module 8
+
+## Advanced Statistics in R
+
+### Sampling Distributions and Confidence
+
+-   A **sampling distribution** is a probability distribution that accounts for
+    variability when population parameters are estimated using sample
+    statistics.
+
+    -   Modeling variability in an estimated sample statistic is a key part of
+        many statistical analyses.
+
+-   The sampling mean ("X-bar") is calculated using a smaller number of
+    observations, so variability can decrease compared to a population mean.
+
+-   The sampling standard deviation is referred to as the **standard error**
+    ("sigma-X-bar") reflecting the fact that the probabilities are calculated
+    from a sample.
+
+-   The formulas for sampling distributions depend upon the probability
+    distributions that generated the raw data, availability of measures of the
+    population mean and standard deviation, and the size of the sample itself.
+
+-   The formula to calculate the standard error for a sample distribution of
+    size n given a known standard deviation σ is
+
+![](images/sample-stddev.png)
+
+### Normal Distributions
+
+- Normal distributions follow a bell-curve, with consistent percentages of the
+ data falling within (plus or minus) 1, 2 and 3 standard deviations of the mean.
+
+### R Functions for Normal Distributions
+
+```{r}
+?Normal
+```
+
+![](images/standard-normal-distribution.png)
+
+Sample Distribution Example:
+
+- Suppose that the daily maximum temperature in the month of January in Dunedin, New Zealand, follows a normal distribution, with a mean of 22 degrees Celsius and a standard deviation of 1.5 degrees
+    - What is the probability that a randomly chosen day in January has a maximum temperature of less than 21.5 degrees?
+    - What is the probability if the day is chosen from a random sampling of 5 days? (n = 5)
+
+```{r}
+# Pr(X < 21.5)          /// population
+pnorm(21.5, mean=22, sd=1.5)
+
+# Pr(Xbar < 21.5)       /// sample
+pnorm(21.5, mean=22, sd=1.5/sqrt(5))
+```
+
+### Confidence Intervals
+
+- A confidence interval (CI) defines a range of values with a specified probability that the value of a parameter lies within them.
+- A CI allows you to state a “level of confidence” that the parameter falls between an lower and upper limit, often expressed as a percentage. 
+- The confidence interval is defined using a value α, which represents the likelihood that the parameter lies outside the confidence interval
+- The three most common intervals are α = 0.1 (90 percent interval), α = 0.05 (95 percent interval), or α = 0.01 (99 percent interval)
+- The interpretation of a confidence interval (l,u) is stated as "there is a ((1- α) * 100)% confidence level that the parameter value lies somewhere between l and u"
+
+### Finding Confidence Intervals with R
+
+- Suppose we’ve collected a random sample of 10 recently graduated students and collected their annual salaries:
+
+> salaries <- c(44617,7066,17594,2726,1178,18898,5033,37151,4514,4000)
+
+- Estimate the mean salary of all recently graduated students. Find a 90% and a 95% confidence interval for the mean.
+- Assume that incomes are normally distributed with an unknown mean and a standard deviation of $15,000
+- Xbar is the sample mean
+- To calculate a confidence interval use
+  - Xbar +- (plus or minus) the Z-score of α /2 times the standard error
+- Given n = 10 and σ = 15000, this is
+  - CI(α) = Xbar +- z(α/2) * (15000 /sqrt(10))
+
+### Calculate the 90% CI
+
+- α = 0.10
+- Use qnorm to calculate the Z-score of α/2 = z(0.05)
+
+```{r}
+salaries <- c(44617,7066,17594,2726,1178,18898,5033,37151,4514,4000)
+z <- qnorm(.05)
+xbar <- mean(salaries)  # sample mean
+sterr <- (15000 /sqrt(10))  # standard error
+lb <- xbar + z * sterr  # lower CI bound
+ub <- xbar - z * sterr  # upper CI bound
+cat('The 90% CI is (', lb, ',', ub, ')\n')
+```
+
+### Calculate the 95% CI
+
+- For a 95% CI, α = 0.05.
+  - All of the steps are the same, except replace z(.05) with z(.025)
+
+```{r}
+salaries <- c(44617,7066,17594,2726,1178,18898,5033,37151,4514,4000)
+z <- qnorm(.025)
+xbar <- mean(salaries)  # sample mean
+sterr <- (15000 /sqrt(10))  # standard error
+lb <- xbar + z * sterr
+ub <- xbar - z * sterr
+cat('The 95% CI is (', lb, ',', ub, ')\n')
+```
+
+- Note that the range for 95% is larger, a tradeoff for the higher CI
+
+### Hypothesis Testing
+
+- Hypothesis testing defines a **null** and an **alternative** hypothesis
+- The null and alternative hypotheses are denoted H0 and HA, respectively (sometimes H0 and H1, or H0 and H1)
+- The null hypothesis is interpreted as the baseline and is assumed to be true
+- The alternative hypothesis is the item that you are testing against the null hypothesis and is determined before any data are collected
+- The alternative hypothesis takes the form of either an upper-tailed, lower-tailed, or  two-tailed test
+
+- When HA is defined in terms of a "less-than" statement, it is one-sided and lower-tailed.
+  - H0 is rejected if the test statistic is smaller than the critical value.
+- When HA is defined in terms of a "greater-than" statement, it is one-sided and upper-tailed.
+  - H0 is rejected if the test statistic is larger than the critical value.
+- When HA is defined in terms of a "not-equal" statement, it is two-sided, or two-tailed.
+  - H0 is rejected if the test statistic is smaller or larger than the critical value.
+
+### Hypothesis Test Example
+
+- The null hypothesis is usually a hypothesis of "there is no difference"
+  - H0 = "there is no difference between blood pressures in group A and group B if we give group A the test drug and group B a sugar pill."
+- Always define a null hypothesis for each question clearly before the start of a study.
+- The alternative hypothesis (HA) is the opposite of the null hypothesis; this is usually the hypothesis you set out to investigate
+  - HA = "there is a difference in blood pressures between groups A and B if we give group A the test drug and group B a sugar pill".
+
+  <https://www.statsdirect.com/help/basics/p_values.htm>
+
+### The p-value
+
+- The p-value, or calculated probability, is the probability of finding results when the null hypothesis (H0) of a study question is true
+- The p-value is used to quantify the amount of evidence, if any, against the null hypothesis
+- The exact nature of calculating a p-value is dictated by the type of statistics being tested and the nature of the alternative hypothesis
+  - A lower-tailed test implies the p-value is the left-hand tail probability from the sampling distribution of interest
+  - For an upper-tailed test, the p-value is the right-hand tail probability
+  - For a two-sided test, the p-value is the sum of a left-hand tail probability and right-hand tail probability (2x the area in either tail for symmetric distributions)
+

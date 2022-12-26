@@ -1,0 +1,427 @@
+---
+title: COP2073C Intro to Statistical Programming with R
+output:
+  html_document:
+    code_folding: show
+editor_options:
+  chunk_output_type: console
+  markdown: 
+    wrap: 80
+---
+
+```{r rmarkdown-setup, echo = FALSE}
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+```
+
+## Module 6
+
+### Conditions and Loops
+
+- The **if** statement allows for conditional execution of code
+
+```{r}
+a <- 3
+myNumber <- 4
+if (a <= myNumber) {   # end of line brace style
+         a <- a^2
+         print('modifying a')
+}
+
+if (a <= myNumber) 
+{   # next line brace style
+         a <- a^2
+         print('modifying a')
+}
+```
+
+-- end of line or next line brace style is acceptable but be consistent
+
+![](images/brace-indentation.png)
+
+- For a single-line if statement body, braces are not required, but it doesn't hurt to use them anyway
+  - Using them can prevent subsequent defects when code is added to the body later
+  
+```{r}
+a <- 3
+myNumber <- 4
+if (a <= myNumber) # this works
+     a <- a^2
+
+if (a <= myNumber) { # but this is recommended
+     a <- a^2
+}
+```
+
+- Conditions in if statements may be relational or logical expressions
+
+```{r}
+myvec <- c(2.73, 5.40, 2.15, 5.29, 1.36, 2.16, 1.41, 6.97, 7.99, 9.52)
+mymatrix <- matrix(c(2,0,1,2,3,0,3,0,1,1), nrow=5, ncol=2)
+myvec
+mymatrix
+
+if (any((myvec - 1) > 9) || matrix(myvec, 2, 5)[2,1] <= 6) {
+    new.myvec <- myvec
+    new.myvec[seq(1,9,2)] <- NA
+    mylist <- list(aa=new.myvec, bb=mymatrix + 0.05)
+    cat("new list:\n")
+    mylist
+}
+```
+
+![](images/if-statement-explained.png)
+
+- Else statements provide an alternative path for code to follow if an if condition is FALSE
+
+- if (condition) {
+-     # statements executed if condition is true
+- } else {
+-     # statements executed if condition is false
+- }
+
+```{r}
+a <- 5
+myNumber <- 4
+if (a <= myNumber) {
+      a <- a^2
+} else {
+      a <- a - 3.5
+}
+a
+```
+
+### Limitations of if in R
+
+- An if statement can check the condition of only **a single logical value**.
+  - If you pass in a vector of logicals for the condition, the if statement will only check the very first element and a warning is displayed, e.g.
+
+```{r}
+if (c(FALSE,TRUE,FALSE,TRUE,TRUE))  { }
+```
+
+- displays
+  - Warning message:
+  - In if (c(FALSE, TRUE, FALSE, TRUE, TRUE)) { :
+  - the condition has length > 1 and only the first element will be used
+  
+### ifelse for Logical Vectors
+
+- **Description**
+- ifelse returns a value with the same shape as test which is filled with elements selected from either yes or no depending on whether the element of test is TRUE or FALSE.
+- **Usage**
+- ifelse(test, yes, no)
+- **Arguments**
+- test	
+  - an object which can be coerced to a logical value
+- yes	
+  - return values for true elements of test.
+- no	
+  - return values for false elements of test.
+
+```{r}
+x <- 5
+y <- -5:5
+y
+result <- ifelse(test= y == 0, yes = NA, no = x)
+result
+```
+
+- An if statement can be placed within another if statement
+
+![](images/nestedif.png)
+
+- If statements can be sequentially stacked
+
+![](images/stackedif.png)
+
+### The Switch Statement
+
+- switch() provides an alternative to complex stacked sequences
+
+```{r}
+mystring="Bart"
+
+foo <- switch(EXPR=mystring, 
+           Homer=12,
+           Marge=34,
+           Bart=56,
+           Lisa=78,
+           Maggie=90,
+           NA
+         )
+foo
+
+# is equivalent to
+
+if(mystring=="Homer") {
+      foo <- 12
+} else if(mystring=="Marge") {
+      foo <- 34
+} else if(mystring=="Bart") {
+      foo <- 56
+} else if(mystring=="Lisa") {
+      foo <- 78
+} else if(mystring=="Maggie") {
+      foo <- 90
+} else {
+      foo <- NA
+}
+foo
+```
+
+### For Loops
+
+- The for loop iterates through elements in an object
+
+```{r}
+for(myitem in 5:7) {
+  cat("the current item is",myitem,"\n")
+}
+```
+
+- Vector elements in a for loop can be accessed by a variable named in the loop header or by an index
+
+```{r}
+# the following examples are equivalent:
+myvec <- c(0.4,1.1,0.34,0.55)
+for(i in myvec) {
+    print(2 * i)
+}
+
+for(i in 1:length(myvec)) {
+    print(2 * myvec[i])
+}
+```
+
+- Preallocating output objects makes loop processing much more efficient
+  - Time the following operations and compare their performance
+
+```{r}
+system.time({
+  output <- rep(NA, 10000000);  # preallocate output object
+  for (i in 1:10000000) {
+    output[i] <- i + 1
+  }
+})
+
+system.time({
+  output <- NA;                 # dynamically resize output object
+  for (i in 1:10000000) {
+    output[i] <- i + 1
+  }
+})
+```
+
+- For loops can be nested
+  - Align/indent for readability
+  - Variable used in header must be unique
+
+```{r}
+loopvec1 <- c(1, 2, 3)
+loopvec2 <- c(5, 10, 15)
+result <- NULL
+count <- 1
+for (i in 1:length(loopvec1)) {
+    for (j in 1:length(loopvec2)) {
+        result[count] <- loopvec1[i]*loopvec2[j]
+        count <- count + 1
+    }
+}
+result
+```
+
+### While and Repeat Loops
+
+- The while loop runs code while a certain condition remains TRUE
+
+  - while (condition) {
+    - code
+  - }
+  
+```{r}
+i <- 1
+while (i < 6) {
+  print(i)
+  i <- i + 1
+}
+```
+
+- The repeat loop will run code until the Escape key is pressed or the code encounters a break command
+
+  - repeat {
+    - code
+    - if (condition) {
+      - break
+    - }
+  - }
+
+```{r}
+x <- 1
+# Repeat loop
+repeat {
+    print(x)
+    
+    # break statement to terminate if x > 4
+    # comment out for infinite version, 
+    # <Esc> required to terminate
+    if (x > 4) {
+        break
+    } 
+    
+    # Increment x by 1
+    x <- x + 1
+}
+```
+
+- Any number of loops can be nested
+  - The computational cost can become a problem if done unwisely
+  - Many loops can also be replaced by vector operations
+
+  - The following function uses a loop that is not vectorized, the loop  manipulates each element of the vector one at a time
+
+```{r}
+abs_loop <- function(vec) {   # create a function to set abs value
+    for (i in 1:length(vec)) {
+        if (vec[i] < 0) {
+            vec[i] <- -vec[i]
+        }
+    }
+    vec
+}
+#abs_loop(-10000:-1)   # uncomment to call the function
+```
+
+- abs_vec (below) is vectorized
+  - It uses logical subsetting to manipulate every negative number in the vector at the same time
+  - This is much faster than abs_loop because it relies on operations that R does quickly: logical tests, subsetting, and element-wise execution
+
+```{r}
+abs_vec <- function(vec) {  # create a function to set abs value
+    negs <- vec < 0
+    vec[negs] <- vec[negs] * -1
+    vec
+}
+#abs_vec(-10000:-1)   # uncomment to call the function
+```
+
+- You can use R’s <- assignment operator, which is also vectorized, to save a new set of values over an old set
+
+```{r}
+vec <- c(1, -2, 3, -4, 5, -6, 7, -8, 9, -10)
+vec
+vec[vec <  0] <- vec[vec < 0] * -1
+vec
+```
+
+### Loop Guidelines
+
+- If you can avoid loops using vectorization, you should do so
+  - A good way to spot loops that could be vectorized is to look for combinations of if and a loop
+  - if can only be applied to one value at a time
+  - This combination can usually be replaced with logical subsetting, which will do the same thing but run much faster
+  - There are operations that cannot be vectorized and require loops
+- You can dramatically increase the speed of your loops by:
+  - doing as much as you can outside of the loop
+  - making sure that any storage objects that you use with the loop are preallocated
+
+### Implicit Looping with Apply()
+
+- In some situations, especially for relatively routine loops (such as executing some function on each member of a list), you can avoid some of the details associated with explicit looping by using the apply function
+- The apply function is the most basic form of implicit looping; it takes a function and applies it to each margin (see below) of a data structure
+
+  - MARGIN = 1 function is applied over rows
+  - MARGIN = 2 function is applied over columns
+
+```{r}
+foo <- matrix(1:12,4,3)
+foo
+# find the sum using a for loop (by rows)
+row.totals.looprow <- rep(NA,times=nrow(foo))
+for(i in 1:nrow(foo)) {
+    row.totals.looprow[i] <- sum(foo[i,])
+}
+row.totals.looprow
+
+# find the sum using a for loop (by columns)
+row.totals.loopcol <- rep(NA,times=ncol(foo))
+for(i in 1:ncol(foo)) {
+    row.totals.loopcol[i] <- sum(foo[,i])
+}
+row.totals.loopcol
+
+# find the sum using apply
+# by rows
+row.totals.row <- apply(X=foo, MARGIN=1, FUN=sum)
+row.totals.row
+
+# by columns
+row.totals.col <- apply(X=foo, MARGIN=2, FUN=sum)
+row.totals.col
+```
+
+### Apply Variations
+
+- There are different flavors of the basic apply function
+  - The tapply function performs operations on subsets of the object of interest, where those subsets are defined in terms of one or more factor vectors
+  - lapply operates member by member on a list
+  - sapply returns the same results as lapply but in an array form
+  - All apply functions allow for additional arguments to be passed to FUN; most via an ellipsis
+
+### Writing Functions
+
+- Functions have 3 parts: an argument list (i.e. the "formals"), a body, and an environment
+  - Functions in R are objects, just as vectors and data frames are objects
+  - This property is often referred to as "first-class functions"
+
+![](images/function-template.png)
+
+- Functions are defined using the function() function (really!)
+
+![](images/function-template2.png)
+
+- Arguments, tags, and the use of ellipsis depend on the function being defined
+  - If the function does not require any arguments, use empty parentheses ( )
+  - variables created in a function are local to that function
+  - explicit return statements are usually not required
+
+### To Return … or Not to Return
+
+- The last expression evaluated in a function becomes the return value, the result of invoking the function.
+
+```{r}
+f <- function(x) {
+    if (x < 10) {
+        0
+    } else {
+        10
+    }
+}
+
+f(5)
+f(15)
+```
+
+- "Generally, I think it’s good style to reserve the use of an explicit return() for when you are returning early, such as for an error, or a simple case of the function. This style of programming can also reduce the level of indentation, and generally make functions easier to understand because you can reason about them locally."
+
+- Hadley Wickham, "Advanced R", http://adv-r.had.co.nz/Functions.html
+
+![](images/function-with-return.png)
+
+### R Packages
+
+- The fundamental unit of shareable code in R is the package. 
+  - A package bundles together code, data, documentation, and tests, and is easy to share with others.
+  - When you load a package, R checks whether any objects in the package clash with other objects that are accessible in the present session
+
+```{r}
+#install.packages("spatstat")
+#library("spatstat")
+#install.packages("car")
+#library("car")
+```
+
+![](images/package-shadow.png)
+
+- This warning indicates that the two packages each have an object with the same name of "ellipse".
+  - R notifies you that the object masked (aka shadowed"), use package::object to access it

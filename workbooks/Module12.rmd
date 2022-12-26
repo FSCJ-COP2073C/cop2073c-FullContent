@@ -1,0 +1,31 @@
+---
+title: COP2073C Intro to Statistical Programming with R
+output:
+  html_document:
+    code_folding: show
+editor_options:
+  chunk_output_type: console
+  markdown: 
+    wrap: 80
+---
+
+```{r rmarkdown-setup, echo = FALSE}
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+```
+
+## Module 12
+
+## Visualizing Data with the Tidyverse
+
+### Exploratory Data Analysis (EDA)
+
+- Exploratory data analysis (EDA) is a process of investigating data that is analogous to detective work
+  - Data is systematically investigated from different perspectives until a "story" emerges
+  - <https://www.oxfordbibliographies.com/view/document/obo-9780199828340/obo-9780199828340-0200.xml>
+
+- A working hypothesis is generated
+  - "outliers" (extreme values) and invalid assumptions are identified
+  - "Let the data speak for themselves" – use visualizations to construct the story and then communicate it to stakeholders
+  - <https://hbr.org/2013/04/how-to-tell-a-story-with-data>
+  

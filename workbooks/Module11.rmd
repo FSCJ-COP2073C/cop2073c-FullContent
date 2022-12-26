@@ -1,0 +1,53 @@
+---
+title: COP2073C Intro to Statistical Programming with R
+output:
+  html_document:
+    code_folding: show
+editor_options:
+  chunk_output_type: console
+  markdown: 
+    wrap: 80
+---
+
+```{r rmarkdown-setup, echo = FALSE}
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+```
+
+## Module 11
+
+## Modeling Data with the Tidyverse
+
+### Model Basics with modelr
+
+### Introduction to Models
+
+- Models provide simple summaries of datasets
+- They can be used to partition data into patterns and residuals (differences between observed and predicted values of data)
+
+- There are two types of models:
+
+  - A **generic** model which expresses a pattern, e.g.
+
+    - y = a * x + b    or    y = a * x ^ b
+
+  - x and y are known variables from your data
+  - a and b are parameters, or coefficients, that can vary to capture different patterns
+  
+  - A **fitted** model using a specific form of the generic model, e.g.
+
+    - y = 3 * x + 7    or    y = 9 * x2
+
+  - a fitted model is just the closest, "best" model from a family of generic models
+
+### Approximation
+
+- Models look like noisy clouds of points
+- Having the “best” model doesn’t imply that you have a good model
+
+  - "All models are wrong, but some are useful."
+  - George Box <https://en.wikipedia.org/wiki/George_E._P._Box>
+
+- The goal of a model is not to determine absolute truth, but to discover a simple approximation that is still useful
+- There are many different ways to model data, each with its own theoretical backing
+
