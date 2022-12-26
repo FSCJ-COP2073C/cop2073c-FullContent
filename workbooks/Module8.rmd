@@ -51,7 +51,8 @@ knitr::opts_chunk$set(message = FALSE)
 ### R Functions for Normal Distributions
 
 ```{r}
-?Normal
+# uncomment for help page for normal distribution functions
+#?Normal
 ```
 
 ![](images/standard-normal-distribution.png)
@@ -157,4 +158,39 @@ cat('The 95% CI is (', lb, ',', ub, ')\n')
   - A lower-tailed test implies the p-value is the left-hand tail probability from the sampling distribution of interest
   - For an upper-tailed test, the p-value is the right-hand tail probability
   - For a two-sided test, the p-value is the sum of a left-hand tail probability and right-hand tail probability (2x the area in either tail for symmetric distributions)
+
+### The Test Statistic
+
+- The test statistic is compared to the appropriate standardized sampling distribution to yield the p-value
+- Test statistics frequently use Z-scores for normal distributions, or t-scores using t-distributions for small sample sizes (usually less than 30) or when the population standard deviation is unknown
+- The distribution and distance from zero of the test statistic determine the size of the p-value
+  - The more extreme the test statistic, the smaller the p-value
+  - The smaller the p-value, the greater the amount of statistical evidence against the assumed truth of H0
+  
+### Significance Level
+
+- For every hypothesis test, a significance level α is assumed. 
+- The significance level defines a cutoff point, at which you decide whether there is sufficient evidence to view H0 as incorrect and favor HA instead.
+  - If the p-value is greater than or equal to α, then you conclude there is insufficient evidence against the null hypothesis, and therefore you retain H0 when compared to HA
+  - If the p-value is less than α, then the result of the test is statistically significant. This implies there is sufficient evidence against the null hypothesis, and therefore you reject H0 in favor of HA
+
+### Lower-Tailed Tests
+
+- For lower-tailed tests, the rejection region consists of one part, left from the center.
+
+![](images/lower-tailed-test.png)
+
+<https://www.geo.fu-berlin.de/en/v/soga/Basics-of-statistics/Hypothesis-Tests/Introduction-to-Hypothesis-Testing/Critical-Value-and-the-p-Value-Approach/index.html>
+
+### Upper-Tailed Tests
+
+- For upper-tailed tests, the rejection region consists of one part, right of center.
+
+![](images/upper-tailed-test.png)
+
+### Two-Tailed Tests
+
+- For two-tailed tests, the rejection region consists of two parts, one on the left and one on the right.
+
+![](images/two-tailed-test.png)
 
