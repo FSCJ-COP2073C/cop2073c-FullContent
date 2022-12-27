@@ -194,3 +194,189 @@ cat('The 95% CI is (', lb, ',', ub, ')\n')
 
 ![](images/two-tailed-test.png)
 
+### Practice: Single Mean Test Using pt Function
+
+- A manufacturer of a snack advertises a package of snacks has a mean net weight of 80 grams. 
+- A consumer calls in with a complaint—over time they have bought and precisely weighed the contents of 44 randomly selected 80-gram packs from different stores and recorded the weights as follows:
+
+> snacks <- c(87.7,80.01,77.28,78.76,81.52,74.2,80.71,79.5,77.87,81.94,80.7,
+               82.32,75.78,80.19,83.91,79.4,77.52,77.62,81.4,74.89,82.95,
+               73.59,77.92,77.18,79.83,81.23,79.28,78.44,79.01,80.47,76.23,
+               78.89,77.14,69.94,78.54,79.7,82.45,77.29,75.52,77.21,75.99,
+               81.94,80.41,77.7)
+
+- The customer claims that they’ve been shortchanged because their data cannot have arisen from a distribution with mean μ = 80, so the true mean weight must be less than 80. 
+- To investigate this claim, the manufacturer conducts a hypothesis test using a significance level of α = 0.05.
+
+- First, the hypotheses must be defined.
+- The null hypothesis H0, is that the mean net weight μ is 80 grams. 
+- The alternative hypothesis HA, or “what we are testing for”, is that μ is smaller than 80.
+- These hypotheses are formalized as
+
+  - H0: μ = 80
+  - HA: μ < 80
+
+- Second, the mean and standard deviation must be estimated from the sample.
+
+```{r}
+snacks <- c(87.7,80.01,77.28,78.76,81.52,74.2,80.71,79.5,77.87,81.94,80.7,
+               82.32,75.78,80.19,83.91,79.4,77.52,77.62,81.4,74.89,82.95,
+               73.59,77.92,77.18,79.83,81.23,79.28,78.44,79.01,80.47,76.23,
+               78.89,77.14,69.94,78.54,79.7,82.45,77.29,75.52,77.21,75.99,
+               81.94,80.41,77.7)
+n <- length(snacks)
+# calculate the mean
+snack.mean <- mean(snacks)
+snack.mean
+
+# calculate the standard deviation
+snack.sd <- sd(snacks)
+snack.sd
+
+```
+
+- Given the estimated standard deviation, what is the probability of observing a sample mean (n = 44) of 78.91 (the calculated sample mean) grams or less if the true (advertised) mean is 80 grams?
+- To answer this, we need to calculate the relevant test statistic:
+
+![](images/single-mean-test.png)
+
+```{r}
+snack.se <- snack.sd / sqrt(n)
+snack.se
+snack.T <- (mean(snacks)- 80) / snack.se
+snack.T
+
+# use the test statistic to calculate the p-value
+# with the pt function (use n − 1 degrees of freedom)
+pt(snack.T,df=n-1)
+```
+
+- This p-value is smaller than the predefined significance level of α = 0.05
+- The manufacturer can conclude that there is sufficient evidence to reject the null hypothesis in favor of the alternative, suggesting the true value of μ is in fact less than 80 grams
+
+### The t-distribution
+
+- A t-distribution is any member of a family of continuous probability distributions that arises when estimating the mean of a normally distributed population in situations where the sample size is small and the population standard deviation is unknown
+  - Developed by William Sealy Gosset under the pseudonym Student         
+  <http://www.swlearning.com/quant/kohler/stat/biographical_sketches/bio12.1.html>
+  - The t-distribution is symmetric and bell-shaped, like the normal distribution, but has "heavier" tails
+
+![](images/t-distribution.png)
+
+### Student's t-Test using t.test()
+
+- Student's t-test compares two samples to determine if they are different using the means of both samples
+  - goal is evidence of a significant difference between population means (2-sample t) or between the population mean and a hypothesized value (1-sample t)
+  - t-value measures the size of the difference relative to the variation in your sample data
+  - t.test() is another (simpler) way to calculate a confidence interval
+  
+![](images/t-test-help.png)
+
+![](images/t-test-example.png)
+
+### Using t.test() to Analyze Movies
+
+- It's Friday night and you want to watch a movie. There are three movies that caught your eye, but you're not really sure if they're good or not.
+  - In this modern day and age, you're that kind of person that still relies on family and friends for recommendations. So, you ask them to rate those movies and get ready to crunch the data.
+  
+- Movie Ratings (1-5 stars)
+
+  - Interstellar:
+    - 3 stars: 8
+    - 4 stars: 13
+    - 5 stars: 24
+
+> m_in <- c(rep(3,8), rep(4,13), rep(5,24))
+
+  - Star Wars: Last Jedi:
+    - 3 stars: 3
+    - 4 stars: 14
+    - 5 stars: 27
+
+> m_sw <- c(rep(3,3), rep(4,14), rep(5,27))
+
+  - The Emoji Movie:
+    - 1 star: 5
+    - 2 stars: 27
+    - 3 stars: 12
+
+> m_em <- c(rep(1,5), rep(2,27), rep(3,12))
+
+```{r}
+# set up the data, calculate summary stats
+m_in <- c(rep(3,8), rep(4,13), rep(5,24))
+m_sw <- c(rep(3,3), rep(4,14), rep(5,27))
+m_em <- c(rep(1,5), rep(2,27), rep(3,12))
+
+mean_in <- mean(m_in)
+mean_sw <- mean(m_sw)
+mean_em <- mean(m_em)
+
+median_in <- mean(m_in)
+median_sw <- median(m_sw)
+median_em <- median(m_em)
+
+sd_in <- sd(m_in)
+sd_sw <- sd(m_sw)
+sd_em <- sd(m_em)
+```
+
+<https://towardsdatascience.com/hypothesis-testing-in-real-life-47f42420b1f7>
+
+- Define the hypothesis
+
+  - The null hypothesis (H0) states that all things remain equal. No phenomena is observed or there is not relationship between what you are comparing
+  - The alternative hypothesis (HA): states the opposite of the null Hypothesis. That there was some change, or observed relationship between what you are comparing
+  - For your movie choices, you want to know if one movie is significantly better than the others.
+    - In this case, you can build your hypothesis on the difference between the average rating your friends gave to each movie.
+
+- Null hypothesis (H0): The mean of movie A is equal to the mean of movie B 
+- Alternative hypothesis (HA): The mean of movie A is not equal to the mean of movie B
+
+  - H0: μA = μB
+  - HA: μA ≠ μB
+
+- The goal of the test is to reject the null hypothesis with confidence
+- The Welch's t-test (default for t.test) is also called the unequal variances t-test 
+  - Requires data to be normally distributed but takes into account differences in standard deviations
+
+- Specify the Significance Level
+
+  - α (alpha) specifies the probability of rejecting the null hypothesis when it was actually true
+    - The significance levels that are normally used are 1% and 5%
+    - Confidence interval of 95% indicates 5% significance level
+  - t.test() uses a default confidence interval of 95%
+    - (conf.level = 0.95)
+  - also defaults to non-equal standard deviations
+    - (var.equal = FALSE)
+
+- Test 1
+  - Compare "Interstellar" to "Star Wars: Last Jedi"
+
+```{r}
+t.test(m_in,m_sw)
+```
+
+- From these results (low t-value, p-value > 0.05) you cannot prove a statistically significant difference between reviews of the two movies.
+  - We cannot say the Null Hypothesis is true, so we say there is not enough evidence to reject the Null hypothesis
+
+- Test 2
+  - Compare "Interstellar" to "The Emoji Movie"
+
+```{r}
+t.test(m_in,m_em)
+```
+
+- From these results (higher t-value, very small p-value) you can claim that there is a  statistically significant difference between reviews of the two movies.
+  - We can safely reject the null hypothesis (stating there is no statistically significant difference in the ratings of the movies).
+
+### Criticisms of Hypothesis Testing
+
+- The end result of any hypothesis test is dependent upon the arbitrary choice of α, usually set at one of the conventionally used values
+- A p-value never provides “proof” of either H0 or HA being truly correct
+- The p-value indicates the strength of this preference of HA over H0
+- It can only quantify evidence against the null hypothesis
+- Rejecting a null hypothesis is not the same as disproving it.
+- The best way to improve the use and interpretation of hypothesis testing is to understand what it can and cannot tell you
+
+
