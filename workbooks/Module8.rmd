@@ -18,7 +18,7 @@ knitr::opts_chunk$set(message = FALSE)
 
 ## Advanced Statistics in R
 
-### Sampling Distributions and Confidence
+### Ch. 17 Sampling Distributions and Confidence
 
 -   A **sampling distribution** is a probability distribution that accounts for
     variability when population parameters are estimated using sample
@@ -125,7 +125,7 @@ cat('The 95% CI is (', lb, ',', ub, ')\n')
 
 - Note that the range for 95% is larger, a tradeoff for the higher CI
 
-### Hypothesis Testing
+### Ch. 18 Hypothesis Testing
 
 - Hypothesis testing defines a **null** and an **alternative** hypothesis
 - The null and alternative hypotheses are denoted H0 and HA, respectively (sometimes H0 and H1, or H0 and H1)
@@ -379,4 +379,127 @@ t.test(m_in,m_em)
 - Rejecting a null hypothesis is not the same as disproving it.
 - The best way to improve the use and interpretation of hypothesis testing is to understand what it can and cannot tell you
 
+### Ch. 19 Analysis of Variance
 
+- ANOVA
+
+- Analysis of variance (ANOVA) is used to compare multiple means in a test for equivalence.
+  - Measures variation between groups
+  - Similar to t-test for two groups, but more conservative
+  - Null hypothesis: the mean is the same for all groups
+- ANOVA testing reveals that either
+    - H0: cannot be rejected -- no significant difference exists
+  - or
+    - HA: H0 can be rejected -- a significant difference exists
+  - but it does not reveal where the difference comes from
+
+- The F-test
+
+- An F-test is used in ANOVA  to compare overall deviation from the observed population mean.
+  - F-tests are named after the test statistic, F, which was named in honor of Sir Ronald Fisher. 
+  - The F-statistic is a ratio of two variances as a measure of dispersion, or how far the data are scattered from the mean.
+    - Larger values represent greater dispersion.
+  - As values of F increase above 1, the evidence is increasingly inconsistent with the null hypothesis.
+  - The probability (p-value) of a value of F greater than or equal to the observed value is calculated. The null hypothesis is rejected if this probability is less than or equal to the significance level (α).
+
+### One-Way ANOVA
+
+- The simplest version of ANOVA is referred to as one-way or one-factor analysis.
+- The one-way ANOVA is used to test two or more means for equality.
+- Example: 
+  - PlantGrowth (dataset included with the base-R distribution)
+  - Results from an experiment to compare yields (as measured by dried weight of plants) obtained under a control and two different treatment conditions.
+  - Format
+  - A data frame of 30 cases on 2 variables
+    - [, 1]	weight	(numeric)
+    - [, 2]	group	(factor)
+
+  - The levels of group are ‘ctrl’, ‘trt1’, and ‘trt2’
+
+- Summarize the data
+
+```{r}
+str(PlantGrowth)
+head(PlantGrowth)
+summary(PlantGrowth)
+```
+
+- Plot the data; what do you think? Does Treatment 1 or Treatment 2 have a statistically relevant effect on the weight of the plants?
+
+```{r}
+# the ~ symbol is used in formula notation, see below
+boxplot(weight ~ group, data = PlantGrowth)
+```
+
+- We want to know if there is a significant statistical difference between the average weights of the plants in the 3 experimental conditions
+- Before doing the analysis we need to take a detour and look at formula notation so we understand how it is used in the steps we will take
+
+### Formula Notation
+
+- Formula notation in R allows complicated expressions to be specified.
+  - Allows values of variables to be captured ("quoted") without evaluation.
+  - Allows variables inside data frames to be easily accessible.
+  - Basic syntax allows flexibility:
+    - y ~ x1 + x2 + ..., data = data
+
+    - y = response variable
+    - x1... = predictor variables
+    - data = the data object that holds the variables
+
+  - the names for y and xN variables change depending on the context.
+  - y = response = dependent = controlled = feature
+  - xN = predictor = independent = outcome = label
+
+- Formulas are Objects in R
+
+```{r}
+f <- y ~ x
+f
+
+class(f)
+
+typeof(f)
+
+attributes(f)
+```
+
+### One-sided or Two-sided Formulas
+
+- Depending on the context within a function, a one-sided or two-sided formula may be used
+
+```{r}
+e <- ~ x + y          # one-sided
+f <- y ~ x + b        # two-sided
+
+e
+
+f
+```
+
+### One-Way ANOVA
+
+- Continuing our analysis…
+  - We want to know if there is any significant difference between the average weights of plants in the 3 experimental conditions.
+  - The aov() function can be used to answer to this question
+  - This function will create a regression object, which in its raw form isn't that interesting to us, see below for how to use it
+
+```{r}
+aov(weight ~ group, data=PlantGrowth)
+```
+
+- The regression object created by the aov() function can be passed to the summary function to give us the desired results (note the F value and p-value)
+
+```{r}
+pg.aov <- aov(formula = weight ~ group, data = PlantGrowth)
+summary(pg.aov)
+```
+
+- Remember that according to the "F-test", as values of F increase above 1, the evidence is increasingly inconsistent with the null hypothesis. 
+- Since the p-value (labeled "Pf(>F)" in this data) is less than the significance level (0.05 in this example), we have evidence against the null hypothesis H0 (there is no significant difference between the groups).
+
+### Two-Way ANOVA
+
+- In many studies, the numeric outcome variable you’re interested in will be categorized by more than just one grouping variable. 
+  - In these cases, you would use a "multiple-factor" ANOVA rather than the one-way ANOVA. 
+  - This technique is directly referred to by the number of grouping variables used, with two- and three-way ANOVA being the next and most common extensions.
+  - Increasing the number of grouping variables complicates matters, but performing just a one-way ANOVA for each variable separately is inadequate.
