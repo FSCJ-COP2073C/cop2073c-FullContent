@@ -43,11 +43,168 @@ knitr::opts_chunk$set(message = FALSE)
 
 - You only need to install a package once, but you need to reload it (via library) every time you start a new R session
 
+### Version Warnings and Updating Base R
+
+- When you load packages you may see warnings about your version of R.
+- If the library fails to load you can use the following commands from within RStudio to update your baseR version:
+
+> install.packages("installr")
+> library(installr)
+> updateR()
+
+- Be sure to check package documentation before upgrading in case your package doesn't support a more recent version of R.
+
+### Data Visualization with ggplot2
+
+### Answering Questions with Visualization
+
+- Do cars with big engines use more fuel than cars with small engines?
+  - The answer is intuitive but visualization of the data can make it precise
+  - What does the relationship between engine size and fuel efficiency look like?
+
+- The mpg Data Frame
+  - Test your intuition using the mpg data frame found in the ggplot2 package (ggplot2::mpg).
+  - A data frame is a rectangular collection of variables (in the columns) and observations (in the rows)
+    - A tibble is a "modern reimagining" of a data frame (Wickham)
+  - mpg contains observations collected by the US Environment Protection Agency on 38 models of cars
+
+```{r}
+# be sure to install and load the tidyverse
+# package in the previous chunk
+mpg
+```
+
+### The ggplot2::mpg Data Frame
+
+- Among the variables in mpg are:
+  - displ, a car’s engine size, in liters
+  - hwy, a car’s fuel efficiency on the highway, in miles per gallon (mpg)
+    - A car with a low fuel efficiency consumes more fuel than a car with a high fuel efficiency when they travel the same distance
+- enter ?mpg to learn more
+
+### Creating a ggplot
+
+```{r}
+# put displ on the x-axis and hwy on the y-axis:
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy))
+```
+
+### ggplot Basics
+
+- ggplot() creates a coordinate system to which layers can be added.
+- The first argument of ggplot() is the dataset to use in the graph
+  - ggplot(data = mpg) creates an empty graph, but it’s not very interesting
+- Complete the graph by adding one or more layers to ggplot()
+  - The geom_point() function adds a layer of points, which creates a scatterplot.
+  - ggplot2 comes with many geom functions that add a different type of layer to a plot
+
+- The mapping argument defines how variables in your dataset are mapped to visual properties
+- The aes() function adds "aesthetic mappings" which map to variables in the data
+  - The x and y arguments of aes() specify which variables to map to the x- and y-axes
+  - ggplot() looks for the mapped variables in the data argument (e.g. the mpg data frame)
+
+### The mpg Plot
+
+- We can move the aesthetic mapping of the variables into the ggplot function, then the point layer specification is simpler.
+- We can also add a trendline using the lm function.
+
+```{r}
+ggplot(data = mpg, aes(displ,hwy)) +
+  geom_point() + geom_smooth(method = "lm")
+```
+
+- The plot shows a negative relationship (downward trendline) between engine size (displ) and fuel efficiency (hwy). 
+- In other words, cars with big engines use more fuel.
+
+### Aesthetic Mappings
+
+- An aesthetic is a visual property of the objects in your plot 
+  - Aesthetics include things like the size, the shape, or the color of your points. 
+- You can display a point in different ways by changing the values of its aesthetic properties, called "levels". 
+  - For instance, changing the levels of a point’s size, shape, and color can make the point small, triangular, or blue:
+
+![](images/aes-mappings.png)
+
+- You can add a third variable to a two-dimensional scatterplot by mapping it to an aesthetic
+  - map the colors of your points to a third variable "class" to reveal the class of each car:
+
+```{r}
+ggplot(data = mpg) + geom_point(
+     mapping = aes(x = displ, y = hwy, color = class))
+```
+
+- To map an aesthetic to a variable, associate the name of the aesthetic to the name of the variable inside aes() 
+- ggplot() will automatically assign a unique level of the aesthetic (e.g. a unique color) to each unique value of the variable, a process known as scaling
+  - ggplot() will also add a legend that explains which levels correspond to which values
+- We can map class to the size aesthetic in the same way.
+  - In this case, the exact size of each point would reveal its class affiliation. 
+  - Note: mapping an unordered variable (class) to an ordered aesthetic (size, e.g. smallest to largest) is not a good idea
+
+```{r}
+ ggplot(data = mpg) + geom_point(
+               mapping = aes(x = displ, y = hwy, size = class))
+# Warning: Using size for a discrete variable is not advised
+```
+
+### Other Aesthetic Mappings
+
+- alpha (transparency)
+
+![](images/aes-map-alpha.png)
+
+- shape
+  - (note that by default, only6 shapes are used, additionalpoints are unmapped)
+  
+![](images/aes-map-shape.png)
+
+### x and y Aesthetics
+
+- Once you map an aesthetic, ggplot() selects a reasonable scale to use with the aesthetic, and constructs a legend that explains the mapping between levels and values
+- For x and y aesthetics, ggplot() does not create a legend, but it creates an axis line with tick marks and a label
+  - The axis line acts as a legend; it explains the mapping between locations and values
+  - You can also set the geom aesthetic properties manually
+  - For example, to make all of the points in the mpg plot blue:
+
+```{r}
+ggplot(data = mpg) + geom_point(
+   mapping = aes(x = displ, y = hwy), color = "blue")
+```
+
+### Facets
+
+- Another way to add variables, particularly useful for categorical variables, is to split your plot into facets
+  - facets are subplots that each display one subset of the data
+
+```{r}
+ggplot(data = mpg) +
+     geom_point(mapping = aes(x = displ, y = hwy)) +
+     facet_wrap(~ class, nrow = 2)
+```
+
+### The facet_wrap Function
+
+- facet_wrap wraps a 1 dimensional sequence of panels into 2 dimensions
+  - The first argument of facet_wrap() should be a formula
+  - The variable that you pass to facet_wrap() should be discrete (not continuous)
+
+### The R Formula Operator ~
+
+- The tilde operator ~ characterizes formulas in R
+- The variable on the left-hand side of a tilde (~) is the dependent variable, while (one or more) variables on the right-hand side are independent variables
+  - If there are more than one independent variable they are joined by plus signs +
+  - A left-hand side variable is not required, as shown in the above example
+
+### Two-Variable Faceting with facet_grid()
+
+- To facet your plot with a combination of two variables, add facet_grid() to your plot call
+  - The first argument of facet_grid() is also a formula. This time the formula should contain two variable names separated by ~
+
+```{r}
+ggplot(data = mpg) +
+        geom_point(mapping = aes(x = displ, y = hwy)) +
+        facet_grid(drv ~ cyl)
+```
 
 
-
-
-
-
-### Data Visualization with ggplot2 
 
