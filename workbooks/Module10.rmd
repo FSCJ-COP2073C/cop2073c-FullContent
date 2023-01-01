@@ -71,7 +71,7 @@ knitr::opts_chunk$set(message = FALSE)
 
 ```{r}
 # be sure to install and load the tidyverse
-# package in the previous chunk
+# package in the previous chunk (uncomment if necessary)
 mpg
 ```
 
@@ -289,4 +289,285 @@ ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
 ```
 
 - Note: se = FALSE refers to the display of the confidence interval.     - This results in a "shadowed" line, which we avoid here by using se = FALSE
+
+### Workflow: Basics
+
+- Chapter 2 in R for Data Science (Workflow: Basics) is a short review of some basic R concepts, read through the content to be sure you're caught up on those basics before continuing on to the next section.
+
+### Data Transformation with dplyr
+
+- dplyr provides a set of tools for efficiently manipulating datasets in R
+<https://blog.rstudio.com/2014/01/17/introducing-dplyr/>
+- dplyr uses data frames and tibbles
+- Three underlying concepts:
+  - performance
+  - cross-compatibility: anything you can do to a local data frame you can also do to a remote database table
+    - PostgreSQL, MySQL, SQLite and Google bigquery support is built-in
+  - Individual functions that correspond to the most common operations
+    - Each function does one only thing, but does it well
+
+### nycflights13 Dataset
+
+- nycflights13 contains airline on-time data for all flights departing NYC in 2013
+  - Also includes useful 'metadata' on airlines, airports, weather, and planes.
+  
+- Loading dplyr masks some basic R functions:
+
+  - -- Conflicts ----------------------------
+  - tidyverse_conflicts() --
+  - x dplyr::filter()     masks stats::filter()
+  - x .GlobalEnv::first() masks dplyr::first()
+  - x dplyr::lag()        masks stats::lag()
+
+- In order to use the masked functions, use the qualified :: name:
+  - e.g stats::filter(), stats::lag()
+
+```{r}
+install.packages("dplyr")
+library(dplyr)
+library(nycflights13)
+flights
+```
+
+- Flight Data - Data Types
+
+  - int refers to integers
+  - dbl refers to for doubles, or real numbers
+  - chr is used for character vectors, or strings
+  - dttm is date-time (a date + a time)
+    - R refers to these as POSIXct
+  - There are three other common types of variables that aren’t used in this dataset:
+    - lgl refers to logical, vectors that contain only TRUE or FALSE.
+    - fctr is factors, which R uses to represent categorical variables with fixed possible values
+    - date refers to dates
+
+```{r}
+View(flights)
+```
+
+### Basic dplyr Functions
+
+- There are 6 basic functions used in dplyr:
+  - pick observations by their values: filter()
+  - reorder the rows: arrange()
+  - pick variables by their names: select()
+  - create new variables with functions of existing variables: mutate()
+  - collapse many values down to a single summary: summarize()
+  - apply functions on a group-by-group basis: group_by()
+    - group_by() is used with the above five functions
+
+- filter()
+
+- filter() allows you to subset observations based on their values
+  - The first argument is the name of the data frame
+  - The second and subsequent arguments are the expressions that filter the data frame
+
+```{r}
+# Select all flights on January 1st
+filter(flights, month == 1, day == 1)
+```
+
+- filter() results are immutable
+
+  - dplyr functions never modify their inputs; to save the result use the assignment operator
+
+```{r}
+jan1 <- filter(flights, month == 1, day == 1)
+```
+
+  - To both print results and save them, wrap the expression in parentheses:
+
+```{r}
+(dec25 <- filter(flights, month == 12, day == 25))
+```
+
+- Floating Point Representation
+
+  - As with most programming languages, R uses IEEE 754 as the basis for representation of floating point numbers
+  
+```{r}
+# square root of 2 squared should be 2
+sqrt(2) ^ 2 == 2
+
+# 1/49 * 49 should be 1
+1/49 * 49 == 1
+```
+
+  - Instead of relying on ==, use near():
+
+```{r}
+near(sqrt(2) ^ 2,  2)
+near(1 / 49 * 49, 1)
+```
+
+- Missing Values
+
+- NA represents an unknown value so missing values are “contagious”; almost any operation involving an unknown value will also be unknown:
+
+```{r}
+NA > 5
+10 == NA
+NA + 10
+NA / 2
+NA == NA
+```
+
+```{r}
+# Let x be Mary's age. We don't know how old she is.
+x <- NA
+
+# Let y be John's age. We don't know how old he is.
+y <- NA
+
+# Are John and Mary the same age?
+x == y
+# We don't know!
+```
+
+- filter() and Missing Values
+
+- If you want to determine if a value is missing, use is.na():
+```{r}
+x <- NA
+is.na(x)
+```
+
+- filter() only includes rows where the condition is TRUE; it excludes both FALSE and NA values. If you want to preserve missing values, ask for them explicitly:
+
+```{r}
+df <- tibble(x = c(1, NA, 3))
+df
+filter(df, x > 1)
+filter(df, is.na(x) | x > 1)
+```
+
+- arrange()
+
+- arrange() works similarly to filter() except that instead of selecting rows, it changes their order
+  - If you provide more than one column name, each additional column will be used to break ties in the values of preceding columns
+
+```{r}
+arrange(flights, sched_dep_time, year, month, day)
+```
+
+- Use desc() to reorder by a column in descending order:
+
+```{r}
+arrange(flights, desc(dep_delay))
+```
+
+- Missing values are always sorted at the end:
+
+```{r}
+df <- tibble(x = c(5, 2, NA))
+df
+arrange(df, x)
+arrange(df, desc(x))
+```
+
+- select()
+
+- select() allows you to rapidly zoom in on a useful subset using operations based on the names of the variables
+
+```{r}
+# Select columns by name
+select(flights, year, month, day)
+```
+
+- select() also allows exclusion of columns
+
+```{r}
+# Select all columns except those from year to day
+select(flights, -(year:day))
+```
+
+- There are a number of helper functions you can use within select():
+
+  - starts_with("abc") matches names that begin with “abc”
+  - ends_with("xyz") matches names that end with “xyz”
+  - contains("ijk") matches names that contain “ijk”
+
+- Another option is to use select() in conjunction with the everything() helper.
+- This is useful if you have a handful of variables you’d like to move to the start of the data frame
+
+```{r}
+select(flights, time_hour, air_time, everything())
+```
+
+- summarize()
+
+- summarize() is an aggregation function
+  - aggregation functions apply a single function to multiple rows or groups of rows
+  - summarize() can collapse a data frame to a single row
+
+```{r}
+# calculate overall average of flight delas
+summarize(flights, delay = 
+            mean(dep_delay, na.rm = TRUE))
+```
+
+- group_by()
+
+- group_by() changes the unit of analysis from the complete dataset to individual groups
+
+```{r}
+# calculate average delay by date
+by_day <- group_by(flights, year, month, day)
+summarize(by_day, delay = mean(dep_delay, na.rm = TRUE))
+```
+
+### The Pipe Operator %>%
+
+- The pipe operator forwards a value, or the result of an expression, into the next function call/expression
+  - A function to filter data can be written as:
+
+    - filter(data, variable == numeric_value) 
+
+    -   -or- 
+
+    - data %>% filter(variable == numeric_value)
+
+- Both functions complete the same task and the benefit of using %>% may not be immediately evident; however, when you desire to perform multiple functions its advantage becomes obvious
+
+- If we want to filter some data, group it by categories, summarize it, and then order the summarized results we could write it out using multiple objects:
+
+```{r}
+a <- filter(mtcars, carb > 1)
+b <- group_by(a, cyl)
+c <- summarize(b, Avg_mpg = mean(mpg))
+d <- arrange(c, desc(Avg_mpg))
+print(d)
+```
+
+- or using pipes:
+
+```{r}
+mtcars %>%
+        filter(carb > 1) %>%
+        group_by(cyl) %>%
+        summarize(Avg_mpg = mean(mpg)) %>%
+        arrange(desc(Avg_mpg))
+```
+
+- Behind the scenes, x %>% f(y) turns into f(x, y), and x %>% f(y) %>% g(z) turns into g(f(x, y), z), and so on
+- You can use the pipe to rewrite multiple operations in a way that you can read left-to-right, top-to-bottom
+- Pipes are used frequently in R because they improve the readability of code
+
+- Missing Values
+
+  - aggregation functions obey the rule of missing values: if there are any missing values in the input, the output will be a missing value
+
+```{r}
+flights %>%
+     group_by(year, month, day) %>%
+     summarize(mean = mean(dep_delay))
+```
+
+- All aggregation functions have an na.rm argument which removes missing values prior to computation:
+
+```{r}
+flights %>%
+       group_by(year, month, day) %>%
+       summarize(mean = mean(dep_delay, na.rm = TRUE))
+```
 
