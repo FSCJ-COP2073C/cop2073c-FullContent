@@ -294,7 +294,7 @@ plot(m)
 ### Graphical Parameters
 - Graphical parameters can be added to the plot command for visual enhancement
 
-![](images/Slide24-Parameter-PlotDescription.jpg)
+![](images/plot-parameters.png)
 
 
 ### Automatic Plot Types
